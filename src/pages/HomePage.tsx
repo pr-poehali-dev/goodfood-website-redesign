@@ -9,6 +9,7 @@ interface HomePageProps {
 export default function HomePage({ onNavigate }: HomePageProps) {
   const plans = [
     {
+      id: 'weight-loss',
       title: 'Похудение',
       price: '1290₽',
       oldPrice: '1490₽',
@@ -17,6 +18,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       features: ['Дефицит калорий', 'Высокое содержание белка', 'Минимум углеводов'],
     },
     {
+      id: 'maintenance',
       title: 'Поддержание',
       price: '1790₽',
       oldPrice: '1990₽',
@@ -25,6 +27,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       features: ['Сбалансированный рацион', 'Оптимальные пропорции КБЖУ', 'Разнообразное меню'],
     },
     {
+      id: 'mass-gain',
       title: 'Набор массы',
       price: '2090₽',
       oldPrice: '2290₽',
@@ -166,7 +169,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                   </ul>
                   <Button 
                     className="w-full mt-4"
-                    onClick={() => onNavigate('plans')}
+                    onClick={() => onNavigate('plan-detail', plan.id)}
                   >
                     Подробнее
                   </Button>

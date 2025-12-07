@@ -4,8 +4,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 
-export default function PlansPage() {
-  const [activeTab, setActiveTab] = useState('weight-loss');
+interface PlansPageProps {
+  initialTab?: string;
+  onViewDetails: (planId: string) => void;
+}
+
+export default function PlansPage({ initialTab = 'weight-loss', onViewDetails }: PlansPageProps) {
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const plans = {
     'weight-loss': {
@@ -183,9 +188,16 @@ export default function PlansPage() {
               <div className="grid md:grid-cols-2 gap-8">
                 <Card>
                   <CardContent className="p-8">
-                    <h3 className="text-2xl font-bold font-heading text-gray-900 mb-6">
+                    <h3 className="text-2xl font-bold font-heading text-gray-900 mb-4">
                       Преимущества
                     </h3>
+                    <Button 
+                      size="lg" 
+                      className="w-full mb-6"
+                      onClick={() => onViewDetails(key)}
+                    >
+                      Подробнее о рационе
+                    </Button>
                     <ul className="space-y-4">
                       {plan.benefits.map((benefit, index) => (
                         <li key={index} className="flex items-start gap-3">

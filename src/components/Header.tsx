@@ -1,36 +1,38 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Icon from '@/components/ui/icon';
 import AuthModal from './AuthModal';
 
 interface HeaderProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, planType?: string) => void;
   currentPage: string;
+  isAuthenticated: boolean;
+  userName: string;
+  onAuth: (name: string) => void;
+  showAuthModal: boolean;
+  setShowAuthModal: (show: boolean) => void;
 }
 
-export default function Header({ onNavigate, currentPage }: HeaderProps) {
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+export default function Header({ 
+  onNavigate, 
+  currentPage, 
+  isAuthenticated, 
+  userName, 
+  onAuth, 
+  showAuthModal, 
+  setShowAuthModal 
+}: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userName, setUserName] = useState('');
-
-  const navItems = [
-    { label: 'Главная', value: 'home' },
-    { label: 'Рационы', value: 'plans' },
-    { label: 'Как это работает?', value: 'how-it-works' },
-    { label: 'Контакты', value: 'contacts' },
-  ];
-
-  const handleAuth = (name: string) => {
-    setIsAuthenticated(true);
-    setUserName(name);
-    setIsAuthOpen(false);
-  };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUserName('');
+    window.location.reload();
   };
 
   return (
@@ -45,17 +47,51 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
           </button>
 
           <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => (
-              <button
-                key={item.value}
-                onClick={() => onNavigate(item.value)}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  currentPage === item.value ? 'text-primary' : 'text-gray-700'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+            <button
+              onClick={() => onNavigate('home')}
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                currentPage === 'home' ? 'text-primary' : 'text-gray-700'
+              }`}
+            >
+              Главная
+            </button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-1 ${
+                currentPage === 'plans' ? 'text-primary' : 'text-gray-700'
+              }`}>
+                Рационы
+                <Icon name="ChevronDown" size={16} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {planTypes.map((plan) => (
+                  <DropdownMenuItem
+                    key={plan.value}
+                    onClick={() => onNavigate('plans', plan.value)}
+                  >
+                    {plan.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <button
+              onClick={() => onNavigate('how-it-works')}
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                currentPage === 'how-it-works' ? 'text-primary' : 'text-gray-700'
+              }`}
+            >
+              Как это работает?
+            </button>
+
+            <button
+              onClick={() => onNavigate('contacts')}
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                currentPage === 'contacts' ? 'text-primary' : 'text-gray-700'
+              }`}
+            >
+              Контакты
+            </button>
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
@@ -73,7 +109,10 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
                   {userName}
                 </Button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                  <button className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors">
+                  <button 
+                    onClick={() => onNavigate('account')}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors"
+                  >
                     Мои заказы
                   </button>
                   <button className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors">
@@ -88,7 +127,7 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
                 </div>
               </div>
             ) : (
-              <Button onClick={() => setIsAuthOpen(true)} variant="default">
+              <Button onClick={() => setShowAuthModal(true)} variant="default">
                 Личный кабинет
               </Button>
             )}
@@ -109,20 +148,57 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
                   GOODFOOD
                 </button>
                 
-                {navItems.map((item) => (
-                  <button
-                    key={item.value}
-                    onClick={() => {
-                      onNavigate(item.value);
-                      setIsMenuOpen(false);
-                    }}
-                    className={`text-left text-lg font-medium transition-colors hover:text-primary ${
-                      currentPage === item.value ? 'text-primary' : 'text-gray-700'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+                <button
+                  onClick={() => {
+                    onNavigate('home');
+                    setIsMenuOpen(false);
+                  }}
+                  className={`text-left text-lg font-medium transition-colors hover:text-primary ${
+                    currentPage === 'home' ? 'text-primary' : 'text-gray-700'
+                  }`}
+                >
+                  Главная
+                </button>
+
+                <div className="space-y-2">
+                  <div className="text-lg font-medium text-gray-700">Рационы</div>
+                  {planTypes.map((plan) => (
+                    <button
+                      key={plan.value}
+                      onClick={() => {
+                        onNavigate('plans', plan.value);
+                        setIsMenuOpen(false);
+                      }}
+                      className="text-left text-base pl-4 text-gray-600 hover:text-primary transition-colors block w-full"
+                    >
+                      {plan.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => {
+                    onNavigate('how-it-works');
+                    setIsMenuOpen(false);
+                  }}
+                  className={`text-left text-lg font-medium transition-colors hover:text-primary ${
+                    currentPage === 'how-it-works' ? 'text-primary' : 'text-gray-700'
+                  }`}
+                >
+                  Как это работает?
+                </button>
+
+                <button
+                  onClick={() => {
+                    onNavigate('contacts');
+                    setIsMenuOpen(false);
+                  }}
+                  className={`text-left text-lg font-medium transition-colors hover:text-primary ${
+                    currentPage === 'contacts' ? 'text-primary' : 'text-gray-700'
+                  }`}
+                >
+                  Контакты
+                </button>
                 
                 <a
                   href="tel:+79320598712"
@@ -137,7 +213,13 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
                       <Icon name="User" size={16} />
                       {userName}
                     </Button>
-                    <button className="text-left px-4 py-2 text-sm hover:bg-gray-50 rounded transition-colors">
+                    <button 
+                      onClick={() => {
+                        onNavigate('account');
+                        setIsMenuOpen(false);
+                      }}
+                      className="text-left px-4 py-2 text-sm hover:bg-gray-50 rounded transition-colors"
+                    >
                       Мои заказы
                     </button>
                     <button className="text-left px-4 py-2 text-sm hover:bg-gray-50 rounded transition-colors">
@@ -152,7 +234,7 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
                   </div>
                 ) : (
                   <Button onClick={() => {
-                    setIsAuthOpen(true);
+                    setShowAuthModal(true);
                     setIsMenuOpen(false);
                   }} variant="default" className="w-full">
                     Личный кабинет
@@ -165,9 +247,9 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
       </div>
 
       <AuthModal 
-        isOpen={isAuthOpen} 
-        onClose={() => setIsAuthOpen(false)} 
-        onAuth={handleAuth}
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        onAuth={onAuth}
       />
     </header>
   );

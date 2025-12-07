@@ -6,26 +6,82 @@ import { useState } from "react";
 import Header from "./components/Header";
 import HomePage from "./pages/HomePage";
 import PlansPage from "./pages/PlansPage";
+import PlanDetailPage from "./pages/PlanDetailPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import ContactsPage from "./pages/ContactsPage";
+import AccountPage from "./pages/AccountPage";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleNavigate = (page: string, planId?: string) => {
+    setCurrentPage(page);
+    if (planId) {
+      setSelectedPlanId(planId);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAuth = (name: string) => {
+    setIsAuthenticated(true);
+    setUserName(name);
+  };
+
+  const handleAuthRequired = () => {
+    setShowAuthModal(true);
+  };
 
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage onNavigate={setCurrentPage} />;
+        return <HomePage onNavigate={handleNavigate} />;
       case 'plans':
-        return <PlansPage />;
+        return (
+          <PlansPage
+            initialTab={selectedPlanId || 'weight-loss'}
+            onViewDetails={(planId) => handleNavigate('plan-detail', planId)}
+          />
+        );
+      case 'plan-detail':
+        return (
+          <PlanDetailPage
+            planId={selectedPlanId}
+            isAuthenticated={isAuthenticated}
+            onNavigate={handleNavigate}
+            onAuthRequired={handleAuthRequired}
+          />
+        );
+      case 'checkout':
+        if (!isAuthenticated) {
+          handleNavigate('home');
+          return <HomePage onNavigate={handleNavigate} />;
+        }
+        return (
+          <CheckoutPage
+            planId={selectedPlanId}
+            onNavigate={handleNavigate}
+            userName={userName}
+          />
+        );
+      case 'account':
+        if (!isAuthenticated) {
+          handleNavigate('home');
+          return <HomePage onNavigate={handleNavigate} />;
+        }
+        return <AccountPage userName={userName} />;
       case 'how-it-works':
-        return <HowItWorksPage onNavigate={setCurrentPage} />;
+        return <HowItWorksPage onNavigate={handleNavigate} />;
       case 'contacts':
         return <ContactsPage />;
       default:
-        return <HomePage onNavigate={setCurrentPage} />;
+        return <HomePage onNavigate={handleNavigate} />;
     }
   };
 
@@ -35,7 +91,15 @@ const App = () => {
         <Toaster />
         <Sonner />
         <div className="min-h-screen flex flex-col">
-          <Header onNavigate={setCurrentPage} currentPage={currentPage} />
+          <Header
+            onNavigate={handleNavigate}
+            currentPage={currentPage}
+            isAuthenticated={isAuthenticated}
+            userName={userName}
+            onAuth={handleAuth}
+            showAuthModal={showAuthModal}
+            setShowAuthModal={setShowAuthModal}
+          />
           <main className="flex-1">
             {renderPage()}
           </main>
@@ -52,22 +116,22 @@ const App = () => {
                   <h4 className="font-bold mb-4">Навигация</h4>
                   <ul className="space-y-2 text-sm text-gray-400">
                     <li>
-                      <button onClick={() => setCurrentPage('home')} className="hover:text-white transition-colors">
+                      <button onClick={() => handleNavigate('home')} className="hover:text-white transition-colors">
                         Главная
                       </button>
                     </li>
                     <li>
-                      <button onClick={() => setCurrentPage('plans')} className="hover:text-white transition-colors">
+                      <button onClick={() => handleNavigate('plans')} className="hover:text-white transition-colors">
                         Рационы
                       </button>
                     </li>
                     <li>
-                      <button onClick={() => setCurrentPage('how-it-works')} className="hover:text-white transition-colors">
+                      <button onClick={() => handleNavigate('how-it-works')} className="hover:text-white transition-colors">
                         Как это работает
                       </button>
                     </li>
                     <li>
-                      <button onClick={() => setCurrentPage('contacts')} className="hover:text-white transition-colors">
+                      <button onClick={() => handleNavigate('contacts')} className="hover:text-white transition-colors">
                         Контакты
                       </button>
                     </li>
